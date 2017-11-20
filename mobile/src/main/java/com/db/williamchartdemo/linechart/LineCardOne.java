@@ -3,6 +3,8 @@ package com.db.williamchartdemo.linechart;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.support.v7.widget.CardView;
@@ -94,6 +96,13 @@ public class LineCardOne extends CardController {
                 .endAt(6);
         mChart.addData(dataset);
 
+        Paint thresPaint = new Paint();
+        thresPaint.setColor(Color.parseColor("#0079ae"));
+        thresPaint.setStyle(Paint.Style.STROKE);
+        thresPaint.setAntiAlias(true);
+        thresPaint.setStrokeWidth(Tools.fromDpToPx(.75f));
+        thresPaint.setPathEffect(new DashPathEffect(new float[]{10, 10}, 0));
+
         mBaseAction = action;
         Runnable chartAction = new Runnable() {
             @Override
@@ -108,6 +117,7 @@ public class LineCardOne extends CardController {
         mChart.setAxisBorderValues(0, 20)
                 .setYLabels(AxisRenderer.LabelPosition.NONE)
                 .setTooltips(mTip)
+                .setLabelThresholdWithLimit(0, 0, 80f, thresPaint)
                 .show(new Animation().setInterpolator(new BounceInterpolator())
                         .fromAlpha(0)
                         .withEndAction(chartAction));

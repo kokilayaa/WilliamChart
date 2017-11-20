@@ -115,6 +115,8 @@ public abstract class ChartView extends RelativeLayout {
 
     private ArrayList<Integer> mThresholdEndLabels;
 
+    private ArrayList<Float> mThresholdHeight;
+
     /**
      * Chart data to be displayed
      */
@@ -269,6 +271,7 @@ public abstract class ChartView extends RelativeLayout {
         mThresholdEndValues = new ArrayList<>();
         mThresholdStartLabels = new ArrayList<>();
         mThresholdEndLabels = new ArrayList<>();
+        mThresholdHeight = new ArrayList<>();
         mIsDrawing = false;
         data = new ArrayList<>();
         mRegions = new ArrayList<>();
@@ -355,9 +358,26 @@ public abstract class ChartView extends RelativeLayout {
                             getInnerChartRight(), mThresholdEndValues.get(i), style.valueThresPaint);
             if (!mThresholdStartLabels.isEmpty())
                 for (int i = 0; i < mThresholdStartLabels.size(); i++)
-                    drawThreshold(canvas, data.get(0).getEntry(mThresholdStartLabels.get(i)).getX(),
-                            getInnerChartTop(), data.get(0).getEntry(mThresholdEndLabels.get(i)).getX(),
-                            getInnerChartBottom(), style.labelThresPaint);
+                    if (mThresholdHeight.isEmpty()) {
+                        drawThreshold(canvas,
+                                data.get(0).getEntry(mThresholdStartLabels.get(i)).getX(),
+                                getInnerChartTop(),
+                                data.get(0).getEntry(mThresholdEndLabels.get(i)).getX(),
+                                getInnerChartBottom(),
+                                style.labelThresPaint);
+                    } else {
+                        Float chartTop = getInnerChartTop();
+                        Float chartBottom = getInnerChartBottom();
+                        Log.i("ChartView", "Custom method called!");
+                        Log.i("ChartView", chartTop.toString() + " -> top");
+                        Log.i("ChartView", chartBottom.toString() + " -> bottom");
+                        drawThreshold(canvas,
+                                data.get(0).getEntry(mThresholdStartLabels.get(i)).getX(),
+                                mThresholdHeight.get(i),
+                                data.get(0).getEntry(mThresholdEndLabels.get(i)).getX(),
+                                getInnerChartBottom(),
+                                style.labelThresPaint);
+                    }
 
             // Draw data
             if (!data.isEmpty()) onDrawChart(canvas, data);
@@ -1269,6 +1289,27 @@ public abstract class ChartView extends RelativeLayout {
 
         mThresholdStartLabels.add(startLabel);
         mThresholdEndLabels.add(endLabel);
+        style.labelThresPaint = checkNotNull(paint);
+        return this;
+    }
+
+    /**
+     * Display a label threshold either in a form of line or band.
+     * In order to produce a line, the start and end label will be equal.
+     * Height is passed to where the user wish to end the line
+     *
+     * @param startLabel Threshold start label index.
+     * @param endLabel   Threshold end label index.
+     * @param height     Height of the threshold
+     * @param paint      The Paint instance that will be used to draw the grid
+     *                   If null the grid won't be drawn
+     * @return {@link com.db.chart.view.ChartView} self-reference.
+     */
+    public ChartView setLabelThresholdWithLimit(int startLabel, int endLabel, float height, @NonNull Paint paint) {
+
+        mThresholdStartLabels.add(startLabel);
+        mThresholdEndLabels.add(endLabel);
+        mThresholdHeight.add(height);
         style.labelThresPaint = checkNotNull(paint);
         return this;
     }
